@@ -1,4 +1,4 @@
-# Kafka Starter Template
+# NATS Pubsub Starter Template
 
 This example project shows a basic setup of NATS Streaming publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS Streaming cluster.
 

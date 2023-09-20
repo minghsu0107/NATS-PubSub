@@ -1,6 +1,6 @@
 # NATS PubSub Starter Template
 
-This example project shows a basic setup of NATS JetStream publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS Streaming cluster.
+This example project shows a basic setup of NATS JetStream publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS JetStream.
 
 There's a docker-compose file included, so you can run the example and see it in action.
 
@@ -15,13 +15,26 @@ There's a docker-compose file included, so you can run the example and see it in
 
 To run this example you will need Docker and docker-compose installed. See the [installation guide](https://docs.docker.com/compose/install/).
 
-## Usage
-
-```bash
+## Result
+`subscriber1` and `subscriber2` are in the same queue group `example`, and they both subscribe to `example_topic.>`. In each round, `publisher` publishes four messages to `example_topic.a`, `example_topic.b`, `example_topic.a.test`, and `example_topic.b.test` respectively. We can see that both `subscriber1` and `subscriber2` can receive messages from all four subjects, and each message is processed only once by either `subscriber1` or `subscriber2` since they are in the same queue group.
+```
 > docker-compose up
 
-2021/05/30 04:55:40 received message: 2154756c-e621-41d2-bc0a-c3a8ec11b19d, payload: Hello, world!
-2021/05/30 04:55:41 received message: 3d9ddc61-e4fc-47a0-a245-7c44c81614e3, payload: Hello, world!
-2021/05/30 04:55:42 received message: 5e1b9f37-d964-4520-b1fc-a74e55404ac3, payload: Hello, world!
+2023/09/20 12:03:07 [subscriber1] received message: 0, payload: hello from a
+2023/09/20 12:03:07 [subscriber1] received message: 0, payload: hello from b
+2023/09/20 12:03:07 [subscriber2] received message: 0, payload: hello from a.test
+2023/09/20 12:03:07 [subscriber2] received message: 0, payload: hello from b.test
+2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from a
+2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from b
+2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from a.test
+2023/09/20 12:03:08 [subscriber1] received message: 1, payload: hello from b.test
+2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from a
+2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from b
+2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from a.test
+2023/09/20 12:03:09 [subscriber2] received message: 2, payload: hello from b.test
+2023/09/20 12:03:10 [subscriber2] received message: 3, payload: hello from a
+2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from b
+2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from a.test
+2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from b.test
 ...
 ```

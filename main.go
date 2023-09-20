@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 )
 
 func main() {
-
 	marshaler := &nats.GobMarshaler{}
 	logger := watermill.NewStdLogger(false, false)
 	options := []nc.Option{
@@ -26,17 +26,17 @@ func main() {
 	}
 	subscribeOptions := []nc.SubOpt{
 		// Read from the beginning of the channel (default)
-		// nats.DeliverAll(),
+		// nc.DeliverAll(),
 
 		// Only receive messages that were created after the consumer was created
-		// nats.DeliverNew(),
+		// nc.DeliverNew(),
 
 		// Start receiving messages with the last message added to the stream,
 		// or the last message in the stream that matches the consumer's filter subject if defined
-		// nats.DeliverLast(),
+		// nc.DeliverLast(),
 
 		// Read from a specific time the message arrived in the channel
-		// nats.StartTime(startTime),
+		// nc.StartTime(startTime),
 
 		// MaxAckPending sets the number of outstanding acks that are allowed before message delivery is halted
 		// if it is too large, the subscriber will have not enough time processing messages
@@ -45,6 +45,7 @@ func main() {
 		nc.MaxAckPending(2048),
 
 		// MaxDeliver sets the number of redeliveries for a message
+		// Applies to any message that is re-sent due to a negative ack, or no ack sent by the client
 		nc.MaxDeliver(15),
 		nc.AckExplicit(),
 
@@ -57,19 +58,14 @@ func main() {
 	}
 
 	jsConfig := nats.JetStreamConfig{
-		Disabled:      false,
-		AutoProvision: true,
-		ConnectOptions: []nc.JSOpt{
-			// the maximum outstanding async publishes that can be inflight at one time
-			nc.PublishAsyncMaxPending(16384),
-		},
+		Disabled:         false,
+		AutoProvision:    false,
 		SubscribeOptions: subscribeOptions,
-		PublishOptions:   nil,
 		TrackMsgId:       false,
 		AckAsync:         false,
 		DurablePrefix:    "my-durable",
 	}
-	subscriber, err := nats.NewSubscriber(
+	subscriber1, err := nats.NewSubscriber(
 		nats.SubscriberConfig{
 			URL: os.Getenv("NATS_URL"),
 			// For non durable queue subscribers, when the last member leaves the group,
@@ -92,28 +88,16 @@ func main() {
 		panic(err)
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		fmt.Println("\r- Ctrl+C pressed in Terminal - closing subscriber")
-		subscriber.Close()
-		os.Exit(0)
-	}()
-
-	messages, err := subscriber.Subscribe(context.Background(), "example_topic")
-	if err != nil {
-		panic(err)
-	}
-
-	go processJS(messages)
-
-	publisher, err := nats.NewPublisher(
-		nats.PublisherConfig{
-			URL:         os.Getenv("NATS_URL"),
-			NatsOptions: options,
-			Marshaler:   marshaler,
-			JetStream:   jsConfig,
+	subscriber2, err := nats.NewSubscriber(
+		nats.SubscriberConfig{
+			URL:              os.Getenv("NATS_URL"),
+			QueueGroupPrefix: "example",
+			SubscribersCount: 4,
+			CloseTimeout:     time.Minute,
+			AckWaitTimeout:   time.Second * 30,
+			NatsOptions:      options,
+			Unmarshaler:      marshaler,
+			JetStream:        jsConfig,
 		},
 		logger,
 	)
@@ -121,20 +105,81 @@ func main() {
 		panic(err)
 	}
 
-	for {
-		msg := message.NewMessage(watermill.NewUUID(), []byte("Hello, world!"))
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Println("\r- Ctrl+C pressed in Terminal - closing subscriber")
+		subscriber1.Close()
+		os.Exit(0)
+	}()
 
-		if err := publisher.Publish("example_topic", msg); err != nil {
+	messages1, err := subscriber1.Subscribe(context.Background(), "example_topic.>")
+	if err != nil {
+		panic(err)
+	}
+	go processJS(messages1, "subscriber1")
+
+	messages2, err := subscriber2.Subscribe(context.Background(), "example_topic.>")
+	if err != nil {
+		panic(err)
+	}
+	go processJS(messages2, "subscriber2")
+
+	publisher, err := nats.NewPublisher(
+		nats.PublisherConfig{
+			URL:         os.Getenv("NATS_URL"),
+			NatsOptions: options,
+			Marshaler:   marshaler,
+			JetStream: nats.JetStreamConfig{
+				Disabled:      false,
+				AutoProvision: false,
+				ConnectOptions: []nc.JSOpt{
+					// the maximum outstanding async publishes that can be inflight at one time
+					nc.PublishAsyncMaxPending(16384),
+				},
+				PublishOptions: nil,
+				TrackMsgId:     false,
+				AckAsync:       false,
+			},
+		},
+		logger,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	i := 0
+	var id string
+	for {
+		id = strconv.Itoa(i)
+		msgA := message.NewMessage(id, []byte("hello from a"))
+		msgB := message.NewMessage(id, []byte("hello from b"))
+		msgATest := message.NewMessage(id, []byte("hello from a.test"))
+		msgBTest := message.NewMessage(id, []byte("hello from b.test"))
+
+		if err := publisher.Publish("example_topic.a", msgA); err != nil {
+			panic(err)
+		}
+		if err := publisher.Publish("example_topic.b", msgB); err != nil {
+			panic(err)
+		}
+
+		if err := publisher.Publish("example_topic.a.test", msgATest); err != nil {
+			panic(err)
+		}
+		if err := publisher.Publish("example_topic.b.test", msgBTest); err != nil {
 			panic(err)
 		}
 
 		time.Sleep(time.Second)
+		i++
 	}
 }
 
-func processJS(messages <-chan *message.Message) {
+func processJS(messages <-chan *message.Message, from string) {
 	for msg := range messages {
-		log.Printf("received message: %s, payload: %s", msg.UUID, string(msg.Payload))
+		log.Printf("[%s] received message: %s, payload: %s", from, msg.UUID, string(msg.Payload))
 
 		// we need to Acknowledge that we received and processed the message,
 		// otherwise, it will be resent over and over again.

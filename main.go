@@ -111,6 +111,7 @@ func main() {
 		<-c
 		fmt.Println("\r- Ctrl+C pressed in Terminal - closing subscriber")
 		subscriber1.Close()
+		subscriber2.Close()
 		os.Exit(0)
 	}()
 

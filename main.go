@@ -39,7 +39,7 @@ func main() {
 		// nats.StartTime(startTime),
 
 		// MaxAckPending sets the number of outstanding acks that are allowed before message delivery is halted
-		// if MaxInflight is too large, the subscriber will have not enough time processing messages
+		// if it is too large, the subscriber will have not enough time processing messages
 		// before NATS timeout. In this case, NATS will send the same batch of messages
 		// to another subscriber in the same queue group. Thus, messages may be processed twice
 		nc.MaxAckPending(2048),

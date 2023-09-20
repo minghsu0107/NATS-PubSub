@@ -1,13 +1,13 @@
 # NATS PubSub Starter Template
 
-This example project shows a basic setup of NATS Streaming publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS Streaming cluster.
+This example project shows a basic setup of NATS JetStream publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS Streaming cluster.
 
 There's a docker-compose file included, so you can run the example and see it in action.
 
 ## Files
 
 - [main.go](main.go) - example source code
-- [docker-compose.yml](docker-compose.yml) - local environment Docker Compose configuration, contains Golang, Kafka and Zookeeper
+- [docker-compose.yml](docker-compose.yml) - local environment Docker Compose configuration
 - [go.mod](go.mod) - Go modules dependencies, you can find more information at [Go wiki](https://github.com/golang/go/wiki/Modules)
 - [go.sum](go.sum) - Go modules checksums
 

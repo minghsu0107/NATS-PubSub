@@ -68,11 +68,19 @@ func main() {
 	subscriber1, err := nats.NewSubscriber(
 		nats.SubscriberConfig{
 			URL: os.Getenv("NATS_URL"),
-			// For non durable queue subscribers, when the last member leaves the group,
-			// that group is removed. A durable queue group (DurableName) allows you to have all members leave
+			// A durable queue group (non-empty durable name) allows you to have all members leave
 			// but still maintain state. When a member re-joins, it starts at the last position in that group.
-			// When QueueGroup is empty, subscribe without QueueGroup will be used
-			// in this case, SubscribersCount should be set to 1 to avoid duplication
+
+			// When QueueGroup is empty, subscribe without QueueGroup (default subscribe, fan-out push pattern) will be used
+			// - If using non-empty durable name with default subscribe, the library will attempt to lookup a JetStream
+			//   consumer with this name, and if found, will bind to it and not attempt to delete it.
+			//   However, if not found, the library will send a request to create such durable JetStream consumer.
+			//   Now JetStream will persist the position of the durable consumer over the stream
+			//   Note that DurablePrefix should be unique for each subscriber here to avoid duplication
+			// - If using empty durable name with default subscribe, the library will send a request to the server
+			//   to create an ephemeral JetStream consumer, which will be deleted after an Unsubscribe() or Drain()
+			//   Ephemeral consumers are meant to be used by a single instance of an application (e.g. to get its own replay of the messages in the stream)
+			// In both case, SubscribersCount should be set to 1 to avoid duplication
 			QueueGroupPrefix: "example",
 			SubscribersCount: 4, // how many goroutines should consume messages
 			CloseTimeout:     time.Minute,

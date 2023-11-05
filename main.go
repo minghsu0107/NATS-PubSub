@@ -58,6 +58,14 @@ func main() {
 		// Discard Policy can be either Old (default) or New. It affects how MaxMessages and MaxBytes operate.
 		// If a limit is reached and the policy is Old, the oldest message is removed.
 		// If the policy is New, new messages are refused if it would put the stream over the limit.
+
+		// InactiveThreshold indicates how long the server should keep a consumer
+		// after detecting a lack of activity. In NATS Server 2.8.4 and earlier, this
+		// option only applies to ephemeral consumers. In NATS Server 2.9.0 and later,
+		// this option applies to both ephemeral and durable consumers, allowing durable
+		// consumers to also be deleted automatically after the inactivity threshold has passed
+		// (By default, durables will remain even when there are periods of inactivity unless InactiveThreshold is set explicitly)
+		nc.InactiveThreshold(300 * time.Second),
 	}
 
 	// if JetStreamConfig.Disabled is set to true, then core NATS subscription is used
@@ -89,6 +97,7 @@ func main() {
 			//   Note that DurablePrefix should be unique for each subscriber here to avoid duplication
 			// - If using empty DurablePrefix with default subscribe, the library will send a request to the server
 			//   to create an ephemeral JetStream consumer, which will be deleted after an Unsubscribe() or Drain()
+			//   or after InactiveThreshold (defaults to 5 seconds) is reached when not actively consuming messages
 			//   Ephemeral consumers are meant to be used by a single instance of an application (e.g. to get its own replay of the messages in the stream)
 			// In both case, SubscribersCount should be set to 1 to avoid duplication
 			QueueGroupPrefix: "example",

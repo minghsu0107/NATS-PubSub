@@ -148,8 +148,9 @@ func main() {
 					nc.PublishAsyncMaxPending(16384),
 				},
 				PublishOptions: nil,
-				TrackMsgId:     false,
-				AckAsync:       false,
+				// enable idempotent message writes by ignoring duplicate messages as indicated by the Nats-Msg-Id header
+				TrackMsgId: false,
+				AckAsync:   false,
 			},
 		},
 		logger,

@@ -16,6 +16,7 @@ import (
 	nc "github.com/nats-io/nats.go"
 )
 
+// push-based consumer example
 func main() {
 	marshaler := &nats.GobMarshaler{}
 	logger := watermill.NewStdLogger(false, false)
@@ -24,7 +25,9 @@ func main() {
 		nc.Timeout(30 * time.Second),
 		nc.ReconnectWait(1 * time.Second),
 	}
-	subscribeOptions := []nc.SubOpt{
+
+	// jsSubOptions are JetStream-specific configurations
+	jsSubOptions := []nc.SubOpt{
 		// Read from the beginning of the channel (default)
 		// nc.DeliverAll(),
 
@@ -57,27 +60,34 @@ func main() {
 		// If the policy is New, new messages are refused if it would put the stream over the limit.
 	}
 
+	// if JetStreamConfig.Disabled is set to true, then core NATS subscription is used
+	// - If QueueGroup is not empty, then at-most-once queue group pattern will be used
+	// - If QueueGroup is empty, then at-most-once fan-out push pattern will be used
+	//   SubscribersCount should be set to 1 to avoid duplication
 	jsConfig := nats.JetStreamConfig{
 		Disabled:         false,
 		AutoProvision:    false,
-		SubscribeOptions: subscribeOptions,
+		SubscribeOptions: jsSubOptions,
 		TrackMsgId:       false,
 		AckAsync:         false,
 		DurablePrefix:    "my-durable",
 	}
+
+	// the following comments are JetStream specific, ie. discussion on durability (JetStreamConfig.Disabled = false)
 	subscriber1, err := nats.NewSubscriber(
 		nats.SubscriberConfig{
 			URL: os.Getenv("NATS_URL"),
-			// A durable queue group (non-empty durable name) allows you to have all members leave
+			// A durable queue group (non-empty DurablePrefix) allows you to have all members leave
 			// but still maintain state. When a member re-joins, it starts at the last position in that group.
+			// If using empty DurablePrefix or no binding options being specified, the queue name will be used as a durable name
 
 			// When QueueGroup is empty, subscribe without QueueGroup (default subscribe, fan-out push pattern) will be used
-			// - If using non-empty durable name with default subscribe, the library will attempt to lookup a JetStream
+			// - If using non-empty DurablePrefix with default subscribe, the library will attempt to lookup a JetStream
 			//   consumer with this name, and if found, will bind to it and not attempt to delete it.
 			//   However, if not found, the library will send a request to create such durable JetStream consumer.
 			//   Now JetStream will persist the position of the durable consumer over the stream
 			//   Note that DurablePrefix should be unique for each subscriber here to avoid duplication
-			// - If using empty durable name with default subscribe, the library will send a request to the server
+			// - If using empty DurablePrefix with default subscribe, the library will send a request to the server
 			//   to create an ephemeral JetStream consumer, which will be deleted after an Unsubscribe() or Drain()
 			//   Ephemeral consumers are meant to be used by a single instance of an application (e.g. to get its own replay of the messages in the stream)
 			// In both case, SubscribersCount should be set to 1 to avoid duplication

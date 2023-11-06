@@ -35,8 +35,8 @@ func main() {
 	}
 
 	consumerConfig := natsJS.ConsumerConfig{
-		Name: "myconsumer1",
-		// Durable:       "myconsumer1",
+		Name: "myconsumer",
+		// Durable:       "myconsumer",
 		DeliverPolicy: natsJS.DeliverAllPolicy,
 		AckPolicy:     natsJS.AckExplicitPolicy,
 		MaxDeliver:    15,

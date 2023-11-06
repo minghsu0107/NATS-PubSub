@@ -1,4 +1,4 @@
-# NATS PubSub Starter Template
+# NATS PubSub Starter Template (Pull-based Consumer)
 
 This example project shows a basic setup of NATS JetStream publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS JetStream.
 
@@ -16,25 +16,4 @@ There's a docker-compose file included, so you can run the example and see it in
 To run this example you will need Docker and docker-compose installed. See the [installation guide](https://docs.docker.com/compose/install/).
 
 ## Result
-`subscriber1` and `subscriber2` are in the same queue group `example`, and they both subscribe to `example_topic.>`. In each round, `publisher` publishes four messages to `example_topic.a`, `example_topic.b`, `example_topic.a.test`, and `example_topic.b.test` respectively. We can see that both `subscriber1` and `subscriber2` can receive messages from all four subjects, and each message is processed only once by either `subscriber1` or `subscriber2` since they are in the same queue group.
-```
-> docker-compose up
-
-2023/09/20 12:03:07 [subscriber1] received message: 0, payload: hello from a
-2023/09/20 12:03:07 [subscriber1] received message: 0, payload: hello from b
-2023/09/20 12:03:07 [subscriber2] received message: 0, payload: hello from a.test
-2023/09/20 12:03:07 [subscriber2] received message: 0, payload: hello from b.test
-2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from a
-2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from b
-2023/09/20 12:03:08 [subscriber2] received message: 1, payload: hello from a.test
-2023/09/20 12:03:08 [subscriber1] received message: 1, payload: hello from b.test
-2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from a
-2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from b
-2023/09/20 12:03:09 [subscriber1] received message: 2, payload: hello from a.test
-2023/09/20 12:03:09 [subscriber2] received message: 2, payload: hello from b.test
-2023/09/20 12:03:10 [subscriber2] received message: 3, payload: hello from a
-2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from b
-2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from a.test
-2023/09/20 12:03:10 [subscriber1] received message: 3, payload: hello from b.test
-...
-```
+`subscriber1` and `subscriber2` represent two subscriptions bound to the same consumer `myconsumer`, and they both subscribe to `example_topic.test`. `publisher` publishes a messages to `example_topic.test` every 50 millisecond. We can see that a message is processed by either `subscriber1` or `subscriber2` once since the stream `example_topic` uses the work-queue retention policy.

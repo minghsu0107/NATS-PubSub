@@ -2,6 +2,8 @@
 
 This example project shows a basic setup of NATS JetStream publisher / subscriber using [Watermill](https://watermill.io/). The application runs in a loop, consuming events from a NATS JetStream.
 
+This is an example for NATS push-based consumers. For pull-based consumers, see [this branch](https://github.com/minghsu0107/NATS-PubSub/tree/pull-consumer).
+
 There's a docker-compose file included, so you can run the example and see it in action.
 
 ## Files

@@ -48,12 +48,9 @@ func main() {
 
 		// the followings are pull-specific options
 		// The maximum number of inflight pull requests
-		MaxWaiting: 1024,
+		MaxWaiting: 4096,
 		// The maximum total bytes that can be requested in a given batch
 		MaxRequestMaxBytes: 1024 * 1024,
-		// The maximum batch size a single pull request can make
-		// When set with MaxRequestMaxBytes, the batch size will be constrained by whichever limit is hit first
-		MaxRequestBatch: 1024 * 50,
 	}
 	namer := func(_ string, _ string) natsJS.ConsumerConfig {
 		return consumerConfig
@@ -64,6 +61,16 @@ func main() {
 		Conn:                conn1,
 		AckWaitTimeout:      5 * time.Second,
 		ResourceInitializer: simpleResourceInitializer(namer, "example_topic", ""),
+		ConsumeOptions: []natsJS.PullConsumeOpt{
+			// max_bytes limit on a fetch request
+			natsJS.PullMaxBytes(1024 * 1024),
+			// timeout on a single pull request to the server
+			// waiting until at least one message is available
+			natsJS.PullExpiry(1 * time.Second),
+			// the byte count on which Consume will trigger new pull request to the server
+			// Defaults to 50% of MaxBytes
+			natsJS.PullThresholdBytes(1024 * 512),
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -75,6 +82,11 @@ func main() {
 		Conn:                conn2,
 		AckWaitTimeout:      5 * time.Second,
 		ResourceInitializer: simpleResourceInitializer(namer, "example_topic", ""),
+		ConsumeOptions: []natsJS.PullConsumeOpt{
+			natsJS.PullMaxBytes(1024 * 1024),
+			natsJS.PullExpiry(1 * time.Second),
+			natsJS.PullThresholdBytes(1024 * 512),
+		},
 	})
 	if err != nil {
 		panic(err)

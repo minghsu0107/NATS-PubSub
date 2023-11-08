@@ -1,18 +1,18 @@
 version: '3'
 services:
-  # server:
-  #   image: golang:1.20
-  #   restart: always
-  #   depends_on:
-  #   - nats
-  #   - nats-box
-  #   volumes:
-  #   - .:/app
-  #   - $GOPATH/pkg/mod:/go/pkg/mod
-  #   working_dir: /app
-  #   command: go run main.go
-  #   environment:
-  #     NATS_URL: "nats://mytoken@nats:4222"
+  server:
+    image: golang:1.20
+    restart: always
+    depends_on:
+    - nats
+    - nats-box
+    volumes:
+    - .:/app
+    - $GOPATH/pkg/mod:/go/pkg/mod
+    working_dir: /app
+    command: go run main.go
+    environment:
+      NATS_URL: "nats://mytoken@nats:4222"
   nats-box:
     image: natsio/nats-box:0.14.0
     command: >

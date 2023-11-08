@@ -2,6 +2,8 @@ github.com/ThreeDotsLabs/watermill v1.2.0 h1:TU3TML1dnQ/ifK09F2+4JQk2EKhmhXe7Qv7
 github.com/ThreeDotsLabs/watermill v1.2.0/go.mod h1:IuVxGk/kgCN0cex2S94BLglUiB0PwOm8hbUhm6g2Nx4=
 github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.2 h1:/87LcdSzUEdCKbJptaLE987hOVOs852b+v5pukegggo=
 github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.2/go.mod h1:uslCjpuzANBzawXYlwx2IDyGjpv9M42U2TQH6JMMQis=
+github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.3-0.20231107130947-e3be6f1fbfe8 h1:sROu1TmC3CbPb+BJUK7etM9DSG91YRqkOpFEpDoaWfg=
+github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.3-0.20231107130947-e3be6f1fbfe8/go.mod h1:uslCjpuzANBzawXYlwx2IDyGjpv9M42U2TQH6JMMQis=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=

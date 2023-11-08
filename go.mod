@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/ThreeDotsLabs/watermill v1.2.0
-	github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.2
+	github.com/ThreeDotsLabs/watermill-nats/v2 v2.0.3-0.20231107130947-e3be6f1fbfe8
 	github.com/nats-io/nats.go v1.31.0
 )
 

@@ -18,7 +18,7 @@ import (
 
 // push-based consumer example
 func main() {
-	marshaler := &nats.GobMarshaler{}
+	marshaler := &nats.NATSMarshaler{}
 	logger := watermill.NewStdLogger(false, false)
 	options := []nc.Option{
 		nc.RetryOnFailedConnect(true),

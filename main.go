@@ -77,8 +77,9 @@ func main() {
 		AutoProvision:    false,
 		SubscribeOptions: jsSubOptions,
 		TrackMsgId:       false,
-		AckAsync:         false,
-		DurablePrefix:    "my-durable",
+		// use msg.Ack(), which tells the NTS server that the message was successfully processed and it can move on to the next message
+		AckAsync:      true,
+		DurablePrefix: "my-durable",
 	}
 
 	// the following comments are JetStream specific, ie. discussion on durability (JetStreamConfig.Disabled = false)
@@ -169,7 +170,6 @@ func main() {
 				PublishOptions: nil,
 				// enable idempotent message writes by ignoring duplicate messages as indicated by the Nats-Msg-Id header
 				TrackMsgId: false,
-				AckAsync:   false,
 			},
 		},
 		logger,

@@ -78,7 +78,8 @@ func main() {
 		SubscribeOptions: jsSubOptions,
 		TrackMsgId:       false,
 		// use msg.Ack(), which tells the NTS server that the message was successfully processed and it can move on to the next message
-		AckAsync:      true,
+		AckAsync: true,
+		// create or use a durable consumer named "my-durable"
 		DurablePrefix: "my-durable",
 	}
 
@@ -86,8 +87,8 @@ func main() {
 	subscriber1, err := nats.NewSubscriber(
 		nats.SubscriberConfig{
 			URL: os.Getenv("NATS_URL"),
-			// A durable queue group (non-empty DurablePrefix) allows you to have all members leave
-			// but still maintain state. When a member re-joins, it starts at the last position in that group.
+			// A queue group (queue group should always be used with a durable consumer) allows you to have all subscribers leave
+			// but still maintain state. When a subscriber re-joins, it starts at the last position in that group.
 			// If using empty DurablePrefix or no binding options being specified, the queue name will be used as a durable name
 
 			// When QueueGroup is empty, subscribe without QueueGroup (default subscribe, fan-out push pattern) will be used

@@ -18,7 +18,7 @@ There's a docker-compose file included, so you can run the example and see it in
 To run this example you will need Docker and docker-compose installed. See the [installation guide](https://docs.docker.com/compose/install/).
 
 ## Result
-`subscriber1` and `subscriber2` are in the same queue group `example`, and they both subscribe to `example_topic.>`. In each round, `publisher` publishes four messages to `example_topic.a`, `example_topic.b`, `example_topic.a.test`, and `example_topic.b.test` respectively. We can see that both `subscriber1` and `subscriber2` can receive messages from all four subjects, and each message is processed only once by either `subscriber1` or `subscriber2` since they are in the same queue group.
+`subscriber1` and `subscriber2` represent two subscriptions bound to the same consumer `my-durable` with queue group `example`, and they both subscribe to `example_topic.>`. In each round, `publisher` publishes four messages to `example_topic.a`, `example_topic.b`, `example_topic.a.test`, and `example_topic.b.test` respectively. We can see that both `subscriber1` and `subscriber2` can receive messages from all four subjects, and each message is processed only once by either `subscriber1` or `subscriber2` since they are in the same queue group.
 ```
 > docker-compose up
 

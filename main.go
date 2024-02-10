@@ -97,6 +97,7 @@ func main() {
 			//   However, if not found, the library will send a request to create such durable JetStream consumer.
 			//   Now JetStream will persist the position of the durable consumer over the stream
 			//   Note that DurablePrefix should be unique for each subscriber here to avoid duplication
+			//   ie. each durable consumer should only be bounded by one subscriber in the default subscribe mode
 			// - If using empty DurablePrefix with default subscribe, the library will send a request to the server
 			//   to create an ephemeral JetStream consumer, which will be deleted after an Unsubscribe() or Drain()
 			//   or after InactiveThreshold (defaults to 5 seconds) is reached when not actively consuming messages

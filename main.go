@@ -163,11 +163,11 @@ func main() {
 			NatsOptions: options,
 			Marshaler:   marshaler,
 			JetStream: nats.JetStreamConfig{
-				Disabled:      false,
-				AutoProvision: false,
+				Disabled:       false,
+				AutoProvision:  false,
 				ConnectOptions: []nc.JSOpt{
 					// the maximum outstanding async publishes that can be inflight at one time
-					nc.PublishAsyncMaxPending(16384),
+					// nc.PublishAsyncMaxPending(16384),
 				},
 				PublishOptions: nil,
 				// enable idempotent message writes by ignoring duplicate messages as indicated by the Nats-Msg-Id header

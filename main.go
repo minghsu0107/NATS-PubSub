@@ -12,6 +12,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-nats/v2/pkg/jetstream"
+	"github.com/ThreeDotsLabs/watermill-nats/v2/pkg/nats"
 	"github.com/ThreeDotsLabs/watermill/message"
 	nc "github.com/nats-io/nats.go"
 	natsJS "github.com/nats-io/nats.go/jetstream"
@@ -114,23 +115,38 @@ func main() {
 	}
 	go processJS(messages2, "subscriber2")
 
-	publisher, err := jetstream.NewPublisher(jetstream.PublisherConfig{
-		URL:    os.Getenv("NATS_URL"),
-		Logger: logger,
-	})
+	pubConn, err := nc.Connect(os.Getenv("NATS_URL"), options...)
 	if err != nil {
 		panic(err)
+	}
+	defer pubConn.Close()
+	jsOpts := []natsJS.JetStreamOpt{
+		// sets the maximum outstanding async publishes that can be inflight at one time
+		// natsJS.WithPublishAsyncMaxPending(16384),
+	}
+	js, err := natsJS.New(pubConn, jsOpts...)
+	if err != nil {
+		panic(err)
+	}
+	marshaler := &nats.NATSMarshaler{}
+
+	pubOpts := []natsJS.PublishOpt{
+		natsJS.WithRetryWait(100 * time.Millisecond),
+		natsJS.WithRetryAttempts(3),
 	}
 
 	i := 0
 	var id string
 	for {
 		id = strconv.Itoa(i)
-		msg := message.NewMessage(id, []byte("hello world"))
-
-		if err := publisher.Publish("example_topic.test", msg); err != nil {
+		msg, err := marshaler.Marshal("example_topic.test", message.NewMessage(id, []byte("hello world")))
+		if err != nil {
+			fmt.Println(err)
+		}
+		if _, err = js.PublishMsg(context.Background(), msg, pubOpts...); err != nil {
 			panic(err)
 		}
+
 		fmt.Printf("sent message %v\n", i)
 
 		time.Sleep(50 * time.Millisecond)

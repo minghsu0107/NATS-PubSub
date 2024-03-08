@@ -16,4 +16,4 @@ There's a docker-compose file included, so you can run the example and see it in
 To run this example you will need Docker and docker-compose installed. See the [installation guide](https://docs.docker.com/compose/install/).
 
 ## Result
-`subscriber1` and `subscriber2` represent two subscriptions bound to the same consumer `myconsumer`, and they both subscribe to `example_topic.test`. `publisher` publishes a messages to `example_topic.test` every 50 millisecond. We can see that a message is processed by either `subscriber1` or `subscriber2` once since the stream `example_topic` uses the work-queue retention policy.
+`subscriber1` and `subscriber2` represent two subscriptions bound to the same consumer `myconsumer`, and they both subscribe to `example_topic.test`. `publisher` publishes a messages to `example_topic.test` every 50 millisecond. We can see that a message is processed by either `subscriber1` or `subscriber2` once.

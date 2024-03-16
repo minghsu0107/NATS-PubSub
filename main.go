@@ -49,6 +49,7 @@ func main() {
 
 		// the followings are pull-specific options
 		// The maximum number of inflight pull requests
+		// server default is 512
 		MaxWaiting: 4096,
 		// The maximum total bytes that can be requested in a given batch
 		MaxRequestMaxBytes: 1024 * 1024,

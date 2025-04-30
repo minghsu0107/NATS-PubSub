@@ -80,6 +80,7 @@ func main() {
 		// use msg.Ack(), which tells the NTS server that the message was successfully processed and it can move on to the next message
 		AckAsync: true,
 		// create or use a durable consumer named "my-durable"
+		// if durable is empty, an ephemeral consumer will be created automatically
 		DurablePrefix: "my-durable",
 	}
 
